@@ -173,7 +173,7 @@ class Oscilloscope(object):
 
         bytes_written = self.device_handle.controlWrite(0x40, self.RW_FIRMWARE_REQUEST,
                                                         0xe600, self.RW_FIRMWARE_INDEX,
-                                                        '\x01', timeout=timeout)
+                                                        b'\x01', timeout=timeout)
         assert bytes_written == 1
         firmware_chunk_list = []
         # TODO: Fix this for when 8192 isn't divisible by chunk_len
@@ -185,7 +185,7 @@ class Oscilloscope(object):
             assert len(chunk) == chunk_len
         bytes_written = self.device_handle.controlWrite(0x40, self.RW_FIRMWARE_REQUEST,
                                                         0xe600, self.RW_FIRMWARE_INDEX,
-                                                        '\x00', timeout=timeout)
+                                                        b'\x00', timeout=timeout)
         assert bytes_written == 1
         if not to_ihex:
             return ''.join(firmware_chunk_list)
@@ -263,7 +263,7 @@ class Oscilloscope(object):
         """
         bytes_written = self.device_handle.controlWrite(0x40, self.TRIGGER_REQUEST,
                                                         self.TRIGGER_VALUE, self.TRIGGER_INDEX,
-                                                        '\x01', timeout=timeout)
+                                                        b'\x01', timeout=timeout)
         return bytes_written == 1
 
     def stop_capture(self, timeout=0):
@@ -275,7 +275,7 @@ class Oscilloscope(object):
         """
         bytes_written = self.device_handle.controlWrite(0x40, self.TRIGGER_REQUEST,
                                                         self.TRIGGER_VALUE, self.TRIGGER_INDEX,
-                                                        '\x00', timeout=timeout)
+                                                        b'\x00', timeout=timeout)
         return bytes_written == 1
 
     def read_data(self, data_size=0x400, raw=False, timeout=0):
@@ -408,7 +408,7 @@ class Oscilloscope(object):
                     iso_transfer.submit()
         else:
             assert False
-        for _ in xrange(outstanding_transfers):
+        for _ in range(outstanding_transfers):
             transfer = self.device_handle.getTransfer(iso_packets=packets)
             transfer.setIsochronous(0x82, (packets*self.packetsize), callback=transfer_callback)
             transfer.submit()
@@ -448,7 +448,7 @@ class Oscilloscope(object):
                     bulk_transfer.submit()
         else:
             assert False
-        for _ in xrange(outstanding_transfers):
+        for _ in range(outstanding_transfers):
             transfer = self.device_handle.getTransfer(iso_packets=packets)
             transfer.setBulk(0x86, (packets*self.packetsize), callback=transfer_callback)
             transfer.submit()
@@ -469,7 +469,7 @@ class Oscilloscope(object):
                  Call set() on the returned event to stop sampling.
         """
         # data_size to packets
-        packets = (data_size + self.packetsize-1)/self.packetsize
+        packets = round((data_size + self.packetsize-1)/self.packetsize)
         if self.is_iso:
             return self.read_async_iso(callback, packets, outstanding_transfers, raw)
         else:
@@ -539,7 +539,7 @@ class Oscilloscope(object):
             assert self.open_handle()
         bytes_written = self.device_handle.controlWrite(0x40, self.SET_SAMPLE_RATE_REQUEST,
                                                         self.SET_SAMPLE_RATE_VALUE, self.SET_SAMPLE_RATE_INDEX,
-                                                        chr(rate_index), timeout=timeout)
+                                                        bytes([rate_index]), timeout=timeout)
         assert bytes_written == 0x01
         return True
 
@@ -552,7 +552,7 @@ class Oscilloscope(object):
         :return: A list of times in seconds from beginning of data collection, and the nice human readable rate label.
         """
         rate_label, rate = self.SAMPLE_RATES.get(rate_index, ("? MS/s", 1.0))
-        return [i/rate for i in xrange(num_points)], rate_label
+        return [i/rate for i in range(num_points)], rate_label
 
     def set_num_channels(self, nchannels, timeout=0):
         """
@@ -568,7 +568,7 @@ class Oscilloscope(object):
                 assert self.open_handle()
             bytes_written = self.device_handle.controlWrite(0x40, self.SET_NUMCH_REQUEST,
                                                             self.SET_NUMCH_VALUE, self.SET_NUMCH_INDEX,
-                                                            chr(nchannels), timeout=timeout)
+                                                            bytes([nchannels]), timeout=timeout)
             assert bytes_written == 0x01
             self.num_channels = nchannels
             return True
@@ -594,7 +594,7 @@ class Oscilloscope(object):
             assert self.open_handle()
         bytes_written = self.device_handle.controlWrite(0x40, self.SET_CH1_VR_REQUEST,
                                                         self.SET_CH1_VR_VALUE, self.SET_CH1_VR_INDEX,
-                                                        chr(range_index), timeout=timeout)
+                                                        bytes([range_index]), timeout=timeout)
         assert bytes_written == 0x01
         return True
 
@@ -617,6 +617,6 @@ class Oscilloscope(object):
             assert self.open_handle()
         bytes_written = self.device_handle.controlWrite(0x40, self.SET_CH2_VR_REQUEST,
                                                         self.SET_CH2_VR_VALUE, self.SET_CH2_VR_INDEX,
-                                                        chr(range_index), timeout=timeout)
+                                                        bytes([range_index]), timeout=timeout)
         assert bytes_written == 0x01
         return True
