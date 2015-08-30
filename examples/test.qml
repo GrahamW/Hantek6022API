@@ -22,33 +22,43 @@ Item {
         Text {
             font.pointSize: 24
             font.bold: true
-            text: "Bob Holness"
+            text: "Hantek 6022BE"
             anchors.horizontalCenter: parent.horizontalCenter
             color: "#777"
         }
 
-        Canvas {
-            id:canvas
+        RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            onScaleChanged:requestPaint();
+            Canvas {
+                id:canvas
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                onScaleChanged:requestPaint();
 
-            onPaint: {
-                var ctx = canvas.getContext('2d');
-                ctx.save();
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                onPaint: {
+                    var ctx = canvas.getContext('2d');
+                    ctx.save();
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                ctx.beginPath();
-                var max = container.traceData.length
-                var xf = canvas.width / max
-                var x = 0
-                var yf = canvas.height / 256.0
-                for (var x=0; x < max; x++) {
-                    ctx.lineTo(x * xf, container.traceData[x] * yf);
+                    ctx.beginPath();
+                    var max = container.traceData.length
+                    var xf = canvas.width / max
+                    var x = 0
+                    var yf = canvas.height / 256.0
+                    for (var x=0; x < max; x++) {
+                        ctx.lineTo(x * xf, container.traceData[x] * yf);
+                    }
+                    ctx.stroke();
+
+                    ctx.restore();
                 }
-                ctx.stroke();
+            }
 
-                ctx.restore();
+            ColumnLayout {
+                Button {
+                    text: "Exit"
+                }
             }
         }
     }
